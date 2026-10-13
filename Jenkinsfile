@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -14,7 +15,17 @@ pipeline {
             }
             post {
                 always {
-                    junit 'course-registration-app/target/surefire-reports/TEST-*.xml'
+                    script {
+                        def reports = findFiles(
+                            glob: 'course-registration-app/target/surefire-reports/TEST-*.xml'
+                        )
+
+                        if (reports.length > 0) {
+                            junit 'course-registration-app/target/surefire-reports/TEST-*.xml'
+                        } else {
+                            echo 'No JUnit XML reports found. Check the Maven test output and workspace.'
+                        }
+                    }
                 }
             }
         }
