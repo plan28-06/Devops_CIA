@@ -2,10 +2,23 @@
 pipeline {
     agent any
 
+    environment {
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-25'
+        PATH = "${JAVA_HOME}\\bin;${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Check Environment') {
+            steps {
+                bat 'java -version'
+                bat 'javac -version'
+                bat 'mvn -version'
             }
         }
 
@@ -15,17 +28,8 @@ pipeline {
             }
             post {
                 always {
-                    script {
-                        def reports = findFiles(
-                            glob: 'course-registration-app/target/surefire-reports/TEST-*.xml'
-                        )
-
-                        if (reports.length > 0) {
-                            junit 'course-registration-app/target/surefire-reports/TEST-*.xml'
-                        } else {
-                            echo 'No JUnit XML reports found. Check the Maven test output and workspace.'
-                        }
-                    }
+                    junit allowEmptyResults: true,
+                          testResults: 'course-registration-app/target/surefire-reports/TEST-*.xml'
                 }
             }
         }
