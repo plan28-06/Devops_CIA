@@ -150,4 +150,45 @@ class RegistrationServiceTest {
         assertFalse(result);
         assertFalse(student.isRegistered("CS301"));
     }
+
+    
+@Test
+void shouldRejectRegistrationWhenCourseIsFull() {
+    Course course = new Course(
+            "CS301", "Data Structures", 4, 2, true, null
+    );
+
+    course.incrementEnrollment();
+    course.incrementEnrollment();
+
+    Student student = new Student("S102", "Ravi");
+    RegistrationService service = new RegistrationService();
+
+    boolean result = service.register(student, course);
+
+    assertFalse(result);
+    assertFalse(student.isRegistered("CS301"));
+    assertEquals(0, student.getTotalCredits());
+    assertEquals(2, course.getCurrentEnrollment());
+}
+
+@Test
+void shouldAllowRegistrationWhenOneSeatRemains() {
+    Course course = new Course(
+            "CS302", "Algorithms", 4, 2, true, null
+    );
+
+    course.incrementEnrollment();
+
+    Student student = new Student("S103", "Priya");
+    RegistrationService service = new RegistrationService();
+
+    boolean result = service.register(student, course);
+
+    assertTrue(result);
+    assertTrue(student.isRegistered("CS302"));
+    assertEquals(4, student.getTotalCredits());
+    assertEquals(2, course.getCurrentEnrollment());
+}
+
 }
