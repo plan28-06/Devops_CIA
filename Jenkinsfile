@@ -8,15 +8,9 @@ pipeline {
             }
         }
 
-        stage('Compile') {
+        stage('Build and Test') {
             steps {
-                bat 'mvn -B -DskipTests compile'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'mvn -B test'
+                bat 'mvn -B clean test'
             }
             post {
                 always {
@@ -27,12 +21,14 @@ pipeline {
 
         stage('Package') {
             steps {
-                bat 'mvn -B package'
+                bat 'mvn -B package -DskipTests'
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'course-registration-app/target/*.jar',
-                                     fingerprint: true
+                    archiveArtifacts(
+                        artifacts: 'course-registration-app/target/*.jar',
+                        fingerprint: true
+                    )
                 }
             }
         }
