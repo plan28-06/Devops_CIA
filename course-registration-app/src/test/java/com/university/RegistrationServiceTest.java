@@ -122,34 +122,80 @@ class RegistrationServiceTest {
         assertEquals(1, course.getCurrentEnrollment());
     }
 
-    @Test
-    void shouldRejectRegistrationWhenCreditLimitIsExceeded() {
 
-        Student student = new Student("S101", "Anita");
+@Test
+void shouldAllowRegistrationWhenTotalCreditsReach24() {
+    Student student = new Student("S101", "Anita");
 
-        // Simulate 20 existing credits
-        student.addRegistration("CS101", 4);
-        student.addRegistration("CS102", 4);
-        student.addRegistration("CS201", 4);
-        student.addRegistration("CS202", 4);
-        student.addRegistration("CS203", 4);
+    student.addRegistration("CS101", 4);
+    student.addRegistration("CS102", 4);
+    student.addRegistration("CS201", 4);
+    student.addRegistration("CS202", 4);
+    student.addRegistration("CS203", 4);
 
-        Course course = new Course(
-                "CS301",
-                "Data Structures",
-                4,
-                30,
-                true,
-                null
-        );
+    Course course = new Course(
+            "CS301", "Data Structures", 4, 30, true, null
+    );
 
-        RegistrationService service = new RegistrationService();
+    RegistrationService service = new RegistrationService();
 
-        boolean result = service.register(student, course);
+    boolean result = service.register(student, course);
 
-        assertFalse(result);
-        assertFalse(student.isRegistered("CS301"));
-    }
+    assertTrue(result);
+    assertTrue(student.isRegistered("CS301"));
+    assertEquals(24, student.getTotalCredits());
+    assertEquals(1, course.getCurrentEnrollment());
+}
+
+@Test
+void shouldRejectRegistrationWhenCreditLimitWouldBeExceeded() {
+    Student student = new Student("S101", "Anita");
+
+    student.addRegistration("CS101", 4);
+    student.addRegistration("CS102", 4);
+    student.addRegistration("CS201", 4);
+    student.addRegistration("CS202", 4);
+    student.addRegistration("CS203", 4);
+    student.addRegistration("CS204", 4);
+
+    Course course = new Course(
+            "CS301", "Data Structures", 4, 30, true, null
+    );
+
+    RegistrationService service = new RegistrationService();
+
+    boolean result = service.register(student, course);
+
+    assertFalse(result);
+    assertFalse(student.isRegistered("CS301"));
+    assertEquals(24, student.getTotalCredits());
+    assertEquals(0, course.getCurrentEnrollment());
+}
+
+@Test
+void shouldRejectRegistrationWhenTotalCreditsWouldExceed24() {
+    Student student = new Student("S101", "Anita");
+
+    student.addRegistration("CS101", 4);
+    student.addRegistration("CS102", 4);
+    student.addRegistration("CS201", 4);
+    student.addRegistration("CS202", 4);
+    student.addRegistration("CS203", 4);
+
+    Course course = new Course(
+            "CS301", "Data Structures", 5, 30, true, null
+    );
+
+    RegistrationService service = new RegistrationService();
+
+    boolean result = service.register(student, course);
+
+    assertFalse(result);
+    assertFalse(student.isRegistered("CS301"));
+    assertEquals(20, student.getTotalCredits());
+    assertEquals(0, course.getCurrentEnrollment());
+}
+
 
     
 @Test
